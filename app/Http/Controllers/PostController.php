@@ -44,14 +44,13 @@ class PostController extends Controller
      * Display the specified resource.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
     public function show($id)
     {
         $post = Post::select('posts.*', 'users.name as author')
             ->join('users', 'posts.user_id', '=', 'users.id')
             ->find($id);
-        return view('posts.show', compact('post'));
+        return view('showPost', ['post' => $post]);
     }
 
     /**

@@ -9,4 +9,4 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/posts', 'PostController@index')->name('post.index');
-Route::get('post/show/{id}', 'PostController@show')->name('post.show');
+Route::get('/post/show/{id}', 'PostController@show')->name('post.show');

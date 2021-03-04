@@ -11,7 +11,7 @@
                             <div class="card">
                                 <div class="card-header">{{ $post->title }}</div>
                                 <div class="card-body">{{ $post->excerpt }}</div>
-                                <a href="" class="btn btn-dark float-right">Read...</a>
+                                <a href="{{ route('post.show', ['id' => $post->id]) }}" class="btn btn-dark float-right">Read...</a>
                             </div>
                         </div>
                     @endforeach
