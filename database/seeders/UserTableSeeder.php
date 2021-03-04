@@ -15,10 +15,12 @@ class UserTableSeeder extends Seeder
      */
     public function run()
     {
-        User::insert([
-            'name' => 'TestProfile',
-            'email' => 'test@gmail.com',
-            'password' => Hash::make('password'),
-        ]);
+        $data = [
+            ['name' => 'TestProfile1', 'email' => 'test1@gmail.com', 'password' => Hash::make('password')],
+            ['name' => 'TestProfile2', 'email' => 'test2@gmail.com', 'password' => Hash::make('password')],
+            ['name' => 'TestProfile3', 'email' => 'test3@gmail.com', 'password' => Hash::make('password')]
+        ];
+
+        User::insert($data);
     }
 }
