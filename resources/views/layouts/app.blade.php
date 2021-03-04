@@ -45,18 +45,9 @@
                 @else
                     <ul class="nav">
                         <li class="nav-item">
-                            <a class="nav-link">
+                            <a class="nav-link" href="{{route('user.show', ['id' => Auth::user()->id])}}">
                                 {{ Auth::user()->name }}
                             </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/users">Add User</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/groups">Add Group</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/">User List</a>
                         </li>
                     </ul>
                     <li class="nav-item">
