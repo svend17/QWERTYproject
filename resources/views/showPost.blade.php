@@ -27,7 +27,10 @@
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-primary">Delete</button>
                                 </form>
-                                <a href="#" class="btn btn-dark">Edit</a>
+                                <form method="get" action="{{ route('post.edit', ['id' => $post->id]) }}">
+                                    @csrf
+                                    <button type="submit" class="btn btn-primary">Edit</button>
+                                </form>
                             </div>
                         @endif
                     </div>

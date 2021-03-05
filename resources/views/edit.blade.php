@@ -2,9 +2,10 @@
 
 @section('content')
     <div class="container">
-        <h1>Create Post</h1>
+        <h1>Edit Post</h1>
         <form method="post" enctype="multipart/form-data"
-              action="{{ route('post.store') }}">
+              action="{{ route('post.update', ['id' => $post->id]) }}">
+            @method('PUT')
             @include('form')
         </form>
     </div>

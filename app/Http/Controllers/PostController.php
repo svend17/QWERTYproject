@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Auth;
 class PostController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the post.
      */
     public function index()
     {
@@ -30,7 +30,7 @@ class PostController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a newly created post.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
@@ -49,7 +49,7 @@ class PostController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Display the post.
      *
      * @param  int  $id
      */
@@ -60,14 +60,15 @@ class PostController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Show the form for editing post.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function edit(int $id)
     {
-        //
+        $post = Post::findOrFail($id);
+        return view('edit', ['post'=>$post]);
     }
 
     /**
@@ -79,7 +80,15 @@ class PostController extends Controller
      */
     public function update(Request $request, int $id)
     {
-        //
+        $post = Post::findOrFail($id);
+        $post->title = $request->title;
+        $post->excerpt = $request->excerpt;
+        $post->body = $request->body;
+        $post->created_at = date('Y-m-d H:i:s');
+        $post->save();
+        return redirect()
+            ->route('post.index')
+            ->with('success', 'Post edited');
     }
 
     /**
