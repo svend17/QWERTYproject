@@ -22,7 +22,7 @@ class PostFactory extends Factory
     public function definition()
     {
         return [
-            'user_id' => rand(1,3),
+            'user_id' => rand(1,10),
             'title' => $this->faker->realText(rand(25, 30)),
             'body' => $this->faker->realText(rand(200, 300)),
             'excerpt' => $this->faker->realText(rand(100, 150)),

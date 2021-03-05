@@ -11,7 +11,7 @@ class UserController extends Controller
      * Show profile of user
      *
      * @param $id
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
+     * @return \Illuminate\Contracts\View\View
      */
     public function show($id)
     {
@@ -29,9 +29,8 @@ class UserController extends Controller
     {
         if ($request->File()) {
             $user = User::find($id);
-            $user->img = $request->file('img')->getClientOriginalName();
+            $user->img = $request->file('img')->storeAs($request->path(), $request->user()->id, 'public');
             $user->save();
-            $request->file('img')->storeAs($request->path(), $user->img, 'public');
         }
         return back();
     }
