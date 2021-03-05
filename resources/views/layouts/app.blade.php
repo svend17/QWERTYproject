@@ -25,9 +25,16 @@
 <div id="app">
     <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
         <div class="container">
-            <a class="navbar-brand" href="{{ url('/posts') }}">
+            <a class="navbar-brand" href="{{ url('/post/index') }}">
                 {{ config('app.name', 'Laravel') }}
             </a>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('post.create') }}">Create post</a>
+                    </li>
+                </ul>
+            </div>
             <ul class="nav">
                 <!-- Authentication Links -->
                 @guest

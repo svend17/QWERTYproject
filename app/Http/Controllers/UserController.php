@@ -13,7 +13,7 @@ class UserController extends Controller
      * @param $id
      * @return \Illuminate\Contracts\View\View
      */
-    public function show($id)
+    public function show(int $id)
     {
         $user = User::find($id);
         return view('profile', ['user'=>$user]);
@@ -25,7 +25,7 @@ class UserController extends Controller
      * @param Request $request
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function image(Request $request, $id)
+    public function image(Request $request, int $id)
     {
         if ($request->File()) {
             $user = User::find($id);

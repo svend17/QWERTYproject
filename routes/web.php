@@ -3,12 +3,16 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('post.index');
 });
 
 Auth::routes();
 
-Route::get('/posts', 'PostController@index')->name('post.index');
-Route::get('/post/show/{id}', 'PostController@show')->name('post.show');
-Route::get('/profile/{id}', 'UserController@show')->name('user.show');
-Route::post('/profile/{id}','UserController@image')->name('user.image');
+Route::get('post/index', 'PostController@index')->name('post.index');
+Route::get('post/create', 'PostController@create')->name('post.create');
+Route::post('post/store', 'PostController@store')->name('post.store');
+Route::get('post/show/{id}', 'PostController@show')->name('post.show');
+Route::delete('post/destroy/{id}', 'PostController@destroy')->name('post.destroy');
+
+Route::get('profile/{id}', 'UserController@show')->name('user.show');
+Route::post('profile/{id}','UserController@image')->name('user.image');
