@@ -19,7 +19,9 @@
                                 <div class="card-footer"><div class="nav-link" >
                                         Author: <a href="{{route('user.show', ['id' => $post->user->id])}}">{{ $post->author }}</a>
                                         <br>
-                                        Дата: {{ date_format($post->created_at, 'd.m.Y H:i') }}
+                                        Date: {{ date_format($post->created_at, 'd.m.Y H:i') }}
+                                        <br>
+                                        Views: {{ $post->views }}
                                     </div></div>
                                 <a href="{{ route('post.show', ['id' => $post->id]) }}" class="btn btn-dark float-right">Read...</a>
                             </div>
