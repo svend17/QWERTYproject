@@ -10,22 +10,50 @@ class PostController extends Controller
 {
     /**
      * Display a listing of the post.
+     *
+     * @return \Illuminate\Contracts\View\View
      */
     public function index()
     {
-        $posts = Post::select('posts.*', 'users.name as author')
-            ->join('users', 'posts.user_id', '=', 'users.id')
+        $posts = Post::select('posts.*')
             ->orderBy('posts.created_at', 'desc')
             ->paginate(15);
         return view('posts', ['posts' => $posts]);
     }
 
     /**
+     * Display most views posts
+     *
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function mostViews()
+    {
+        $posts = Post::select('posts.*')
+            ->orderBy('views', 'desc')
+            ->paginate(15);
+        return view('posts', ['posts' => $posts]);
+    }
+
+    /**
+     * Display posts of the current user
+     *
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function myPost()
+    {
+        $posts = Post::select('posts.*')
+            ->where('user_id', Auth::id())
+            ->orderBy('posts.created_at', 'desc')
+            ->paginate(15);
+        return view('posts', ['posts' => $posts]);
+    }
+    /**
      * Show the form for creating a new post.
      *
      * @return \Illuminate\Contracts\View\View
      */
-    public function create() {
+    public function create()
+    {
         return view('create');
     }
 

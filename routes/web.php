@@ -9,6 +9,8 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('post/index', 'PostController@index')->name('post.index');
+Route::get('post/index/mostViews', 'PostController@mostViews')->name('post.mostViews');
+Route::get('post/index/myPost', 'PostController@myPost')->name('post.myPost');
 Route::get('post/create', 'PostController@create')->name('post.create');
 Route::post('post/store', 'PostController@store')->name('post.store');
 Route::get('post/show/{id}', 'PostController@show')->name('post.show');

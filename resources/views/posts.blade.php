@@ -4,7 +4,19 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <ul>
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('post.index') }}">All Posts</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('post.myPost') }}">My Posts</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ route('post.mostViews') }}">Most Views</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link " href="#" >Without reply</a>
+                </li>
                 @if(session('success'))
                     <div class="alert alert-success">
                         {{ session('success') }}
@@ -17,7 +29,7 @@
                                 <div class="card-header">{{ $post->title }}</div>
                                 <div class="card-body">{{ $post->excerpt }}</div>
                                 <div class="card-footer"><div class="nav-link" >
-                                        Author: <a href="{{route('user.show', ['id' => $post->user->id])}}">{{ $post->author }}</a>
+                                        Author: <a href="{{route('user.show', ['id' => $post->user->id])}}">{{ $post->user->name }}</a>
                                         <br>
                                         Date: {{ date_format($post->created_at, 'd.m.Y H:i') }}
                                         <br>
