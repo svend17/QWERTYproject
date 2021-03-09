@@ -40,6 +40,11 @@
                                         Date: {{ date_format($post->created_at, 'd.m.Y H:i') }}
                                         <br>
                                         Views: {{ $post->views }}
+                                        <br>
+                                        Tags:
+                                        @foreach($post->tags as $tag)
+                                            {{ $tag->name }}
+                                        @endforeach
                                     </div>
                                 </div>
                                 <a href="{{ route('post.show', ['id' => $post->id]) }}" class="btn btn-dark float-right">Read...</a>

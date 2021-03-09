@@ -28,4 +28,19 @@ class Post extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
+    /**
+     * Relationship with Tags
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function tags()
+    {
+        return $this->belongsToMany(
+            Tag::class,
+            'tags_posts',
+            'post_id',
+            'tag_id'
+        );
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Post;
+use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -78,8 +79,17 @@ class PostController extends Controller
         if (Auth::check()) {
             $post->user_id = Auth::id();
         }
+        $tags = explode(",", $request->tags);
+        $tagModels = [];
+        foreach ($tags as $tag)
+        {
+            $tagModels[] = Tag::firstOrCreate([
+                'name' => $tag
+            ])->id;
+        }
         $post->category_id = $request->category;
         $post->save();
+        $post->tags()->attach($tagModels);
         return redirect()
             ->route('post.index')
             ->with('success', 'Post added');
@@ -129,7 +139,16 @@ class PostController extends Controller
         $post->body = $request->body;
         $post->category_id = $request->category;
         $post->created_at = date('Y-m-d H:i:s');
+        $tags = explode(",", $request->tags);
+        $tagModels = [];
+        foreach ($tags as $tag)
+        {
+            $tagModels[] = Tag::firstOrCreate([
+                'name' => $tag
+            ])->id;
+        }
         $post->save();
+        $post->tags()->sync($tagModels);
         return redirect()
             ->route('post.index')
             ->with('success', 'Post edited');

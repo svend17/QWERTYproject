@@ -8,10 +8,14 @@
 <div class="form-group">
     <textarea class="form-control" name="body" placeholder="Text" rows="7" required>{{ $post->body ?? '' }}</textarea>
 </div>
+<div class="form-group">
+    <textarea class="form-control" name="tags" placeholder="Tags">@if(isset($post))@foreach($post->tags as $tag){{ $tag->name }},@endforeach @endif</textarea>
+</div>
 <select class="custom-select" name="category">
-    <option value="{{ $post->category->id }}">{{ $post->category->name ?? '' }}</option>
         @foreach($categories as $category)
-        @if($category->id != $post->category->id)
+        @if(isset($post) && $category->id == $post->category->id)
+            <option selected value="{{ $category->id }}">{{ $post->category->name }}</option>
+        @else
             <option value="{{ $category->id }}">{{ $category->name }}</option>
         @endif
         @endforeach
