@@ -28,13 +28,20 @@
                             <div class="card">
                                 <div class="card-header">{{ $post->title }}</div>
                                 <div class="card-body">{{ $post->excerpt }}</div>
-                                <div class="card-footer"><div class="nav-link" >
-                                        Author: <a href="{{route('user.show', ['id' => $post->user->id])}}">{{ $post->user->name }}</a>
+                                <div class="card-footer">
+                                    <div class="nav-link" >
+                                        Author:
+                                        @if($post->user)
+                                            <a href="{{ route('user.show', ['id' => $post->user->id]) }}">{{ $post->user->name }}</a>
+                                        @else
+                                            Anonim
+                                        @endif
                                         <br>
                                         Date: {{ date_format($post->created_at, 'd.m.Y H:i') }}
                                         <br>
                                         Views: {{ $post->views }}
-                                    </div></div>
+                                    </div>
+                                </div>
                                 <a href="{{ route('post.show', ['id' => $post->id]) }}" class="btn btn-dark float-right">Read...</a>
                             </div>
                         </div>

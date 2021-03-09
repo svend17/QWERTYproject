@@ -23,9 +23,13 @@
                     <p class="text-secondary mb-1">E-mail: {{$user->email}}</p>
                 </div>
                 <div class="row">
-                    @foreach ($user->post as $post)
-                        <a href="{{ route('post.show', ['id' => $post->id]) }}" class="card-header">{{ $post->title }}</a>
-                    @endforeach
+                    <ul class="list-group">
+                        @foreach ($user->post as $post)
+                            <li class="list-group-item">
+                                <a href="{{ route('post.show', ['id' => $post->id]) }}">{{ $post->title }}</a>
+                            </li>
+                        @endforeach
+                    </ul>
                 </div>
             </div>
         </div>

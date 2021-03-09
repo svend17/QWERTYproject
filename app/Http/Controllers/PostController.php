@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,7 +32,9 @@ class PostController extends Controller
         $posts = Post::select('posts.*')
             ->orderBy('views', 'desc')
             ->paginate(15);
-        return view('posts', ['posts' => $posts]);
+        return view('posts',
+            ['posts' => $posts]
+        );
     }
 
     /**
@@ -45,7 +48,9 @@ class PostController extends Controller
             ->where('user_id', Auth::id())
             ->orderBy('posts.created_at', 'desc')
             ->paginate(15);
-        return view('posts', ['posts' => $posts]);
+        return view('posts',
+            ['posts' => $posts]
+        );
     }
     /**
      * Show the form for creating a new post.
@@ -54,7 +59,8 @@ class PostController extends Controller
      */
     public function create()
     {
-        return view('create');
+        $categories = Category::all();
+        return view('create', ['categories' => $categories]);
     }
 
     /**
@@ -69,7 +75,10 @@ class PostController extends Controller
         $post->title = $request->title;
         $post->excerpt = $request->excerpt;
         $post->body = $request->body;
-        $post->user_id = Auth::id();
+        if (Auth::check()) {
+            $post->user_id = Auth::id();
+        }
+        $post->category_id = $request->category;
         $post->save();
         return redirect()
             ->route('post.index')
@@ -87,7 +96,9 @@ class PostController extends Controller
         $post = Post::find($id);
         $post->views ++;
         $post->save();
-        return view('showPost', ['post' => $post]);
+        return view('showPost',
+            ['post' => $post]
+        );
     }
 
     /**
@@ -98,12 +109,13 @@ class PostController extends Controller
      */
     public function edit(int $id)
     {
+        $categories = Category::all();
         $post = Post::findOrFail($id);
-        return view('edit', ['post'=>$post]);
+        return view('edit', ['post'=>$post, 'categories' => $categories]);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the post.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id
@@ -115,6 +127,7 @@ class PostController extends Controller
         $post->title = $request->title;
         $post->excerpt = $request->excerpt;
         $post->body = $request->body;
+        $post->category_id = $request->category;
         $post->created_at = date('Y-m-d H:i:s');
         $post->save();
         return redirect()
@@ -123,7 +136,7 @@ class PostController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the post.
      *
      * @param  int  $id
      * @return \Illuminate\Http\RedirectResponse

@@ -19,6 +19,7 @@ class CreatePostsTable extends Migration
             $table->string('excerpt', 150);
             $table->text('body');
             $table->foreignId('user_id')->unsigned()->nullable()->constrained();
+            $table->foreignId('category_id')->constrained();
             $table->integer('views')->default(0);
             $table->timestamps();
         });

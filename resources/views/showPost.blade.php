@@ -15,12 +15,19 @@
                     <div class="clearfix">
                         <span class="float-left">
                             <div class="nav-link" >
-                                Author: <a href="{{route('user.show', ['id' => $post->user->id])}}">{{ $post->user->name }}</a>
+                                Author:
+                                @if($post->user)
+                                    <a href="{{ route('user.show', ['id' => $post->user->id]) }}">{{ $post->user->name }}</a>
+                                @else
+                                    Anonim
+                                @endif
                                 <br>
                                 Дата: {{ date_format($post->created_at, 'd.m.Y H:i') }}
+                                <br>
+                                Category: {{ $post->category->name }}
                             </div>
                         </span>
-                        @if (Auth::user()->name == $post->user->name)
+                        @if (Auth::user()->id === $post->user_id)
                             <div class="nav-link" >
                                 <form method="post" action="{{ route('post.destroy', ['id' => $post->id]) }}">
                                     @csrf
