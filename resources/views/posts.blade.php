@@ -4,25 +4,38 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
+            <form method="get" action="{{ route('tags.search', ['tags' => $tags]) }}">
+                <div class="row d-flex justify-content-center mt-100">
+                    <div class="col-md-6">
+                        <select id="choices-multiple-remove-button" placeholder="Select tags" multiple name="tags[]">
+                            @foreach($tags as $tag)
+                                <option value="{{ $tag->id }}" name="tag">{{ $tag->name }}</option>
+                            @endforeach
+                        </select>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
             <ul class="nav nav-tabs">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('post.index') }}">All Posts</a>
+                    <a class="nav-link" href="{{ route('posts.index') }}">All Posts</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('post.myPost') }}">My Posts</a>
+                    <a class="nav-link" href="{{ route('posts.myPost') }}">My Posts</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ route('post.mostViews') }}">Most Views</a>
+                    <a class="nav-link" href="{{ route('posts.mostViews') }}">Most Views</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link " href="#" >Without reply</a>
                 </li>
-                @if(session('success'))
-                    <div class="alert alert-success">
-                        {{ session('success') }}
-                    </div>
-                @endif
-                <div class="row">
+                    @if(session('success'))
+                        <div class="alert alert-success">
+                            {{ session('success') }}
+                        </div>
+                    @endif
                     @foreach ($posts as $post)
                         <div class="col-6 mb-4">
                             <div class="card">
@@ -47,12 +60,14 @@
                                         @endforeach
                                     </div>
                                 </div>
-                                <a href="{{ route('post.show', ['id' => $post->id]) }}" class="btn btn-dark float-right">Read...</a>
+                                <a href="{{ route('posts.show', ['post' => $post->id]) }}" class="btn btn-dark float-right">Read...</a>
                             </div>
                         </div>
                     @endforeach
                 </div>
-                {{ $posts->links() }}
+        @if(isset($post) && $post instanceof \Illuminate\Pagination\LengthAwarePaginator )
+        {{ $posts->links() }}
+        @endif
             </ul>
         </div>
     </div>

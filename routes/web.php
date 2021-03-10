@@ -3,21 +3,22 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return redirect()->route('post.index');
+    return redirect()->route('posts.index');
 });
 
 Auth::routes();
 
-Route::get('post/index', 'PostController@index')->name('post.index');
-Route::get('post/index/mostViews', 'PostController@mostViews')->name('post.mostViews');
-Route::get('post/index/myPost', 'PostController@myPost')->name('post.myPost');
-
-Route::get('post/create', 'PostController@create')->name('post.create');
-Route::post('post/store', 'PostController@store')->name('post.store');
-Route::get('post/show/{id}', 'PostController@show')->name('post.show');
-Route::delete('post/destroy/{id}', 'PostController@destroy')->name('post.destroy');
-Route::get('post/edit/{id}', 'PostController@edit')->name('post.edit');
-Route::put('post/update/{id}', 'PostController@update')->name('post.update');
+Route::get('posts/filter', 'PostController@search')->name('tags.search');
+Route::get('posts/mostViews', 'PostController@mostViews')->name('posts.mostViews');
+Route::get('posts/myPost', 'PostController@myPost')->name('posts.myPost');
+Route::resource('posts', 'PostController');
+/*Route::get('posts', 'PostController@index')->name('post.index');
+Route::get('posts/create', 'PostController@create')->name('post.create');
+Route::post('posts/store', 'PostController@store')->name('post.store');
+Route::get('posts/show/{id}', 'PostController@show')->name('post.show');
+Route::delete('posts/destroy/{id}', 'PostController@destroy')->name('post.destroy');
+Route::get('posts/edit/{id}', 'PostController@edit')->name('post.edit');
+Route::put('posts/update/{id}', 'PostController@update')->name('post.update');*/
 
 Route::get('profile/{id}', 'UserController@show')->name('user.show');
 Route::post('profile/{id}','UserController@image')->name('user.image');

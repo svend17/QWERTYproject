@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Post;
 use App\Models\Tag;
+use App\Models\TagsPosts;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -20,7 +21,7 @@ class PostController extends Controller
         $posts = Post::select('posts.*')
             ->orderBy('posts.created_at', 'desc')
             ->paginate(15);
-        return view('posts', ['posts' => $posts]);
+        return view('posts', ['posts' => $posts, 'tags' => Tag::all()]);
     }
 
     /**
@@ -34,7 +35,7 @@ class PostController extends Controller
             ->orderBy('views', 'desc')
             ->paginate(15);
         return view('posts',
-            ['posts' => $posts]
+            ['posts' => $posts, 'tags' => Tag::all()]
         );
     }
 
@@ -50,7 +51,7 @@ class PostController extends Controller
             ->orderBy('posts.created_at', 'desc')
             ->paginate(15);
         return view('posts',
-            ['posts' => $posts]
+            ['posts' => $posts, 'tags' => Tag::all()]
         );
     }
     /**
@@ -91,7 +92,7 @@ class PostController extends Controller
         $post->save();
         $post->tags()->attach($tagModels);
         return redirect()
-            ->route('post.index')
+            ->route('posts.index')
             ->with('success', 'Post added');
     }
 
@@ -103,8 +104,8 @@ class PostController extends Controller
      */
     public function show(int $id)
     {
-        $post = Post::find($id);
-        $post->views ++;
+        $post = Post::findOrFail($id);
+        $post->views++;
         $post->save();
         return view('showPost',
             ['post' => $post]
@@ -119,8 +120,8 @@ class PostController extends Controller
      */
     public function edit(int $id)
     {
-        $categories = Category::all();
         $post = Post::findOrFail($id);
+        $categories = Category::all();
         return view('edit', ['post'=>$post, 'categories' => $categories]);
     }
 
@@ -139,6 +140,7 @@ class PostController extends Controller
         $post->body = $request->body;
         $post->category_id = $request->category;
         $post->created_at = date('Y-m-d H:i:s');
+        $post->save();
         $tags = explode(",", $request->tags);
         $tagModels = [];
         foreach ($tags as $tag)
@@ -147,10 +149,9 @@ class PostController extends Controller
                 'name' => $tag
             ])->id;
         }
-        $post->save();
         $post->tags()->sync($tagModels);
         return redirect()
-            ->route('post.index')
+            ->route('posts.index')
             ->with('success', 'Post edited');
     }
 
@@ -165,7 +166,20 @@ class PostController extends Controller
         $post = Post::findOrFail($id);
         $post->delete();
         return redirect()
-            ->route('post.index')
+            ->route('posts.index')
             ->with('success', 'Post deleted');
+    }
+
+    /**
+     * Post Filtration
+     *
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function search(Request $request)
+    {
+        $postsId = TagsPosts::select('post_id')->whereIn('tag_id', $request->tags)->distinct()->get();
+        $posts = Post::whereIn('id', $postsId)->get();
+        return view('posts', ['posts' => $posts, 'tags' => Tag::all()]);
     }
 }

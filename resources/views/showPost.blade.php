@@ -27,14 +27,14 @@
                                 Category: {{ $post->category->name }}
                             </div>
                         </span>
-                        @if (Auth::user()->id === $post->user_id)
+                        @if (Auth::check() && Auth::user()->id === $post->user_id)
                             <div class="nav-link" >
-                                <form method="post" action="{{ route('post.destroy', ['id' => $post->id]) }}">
+                                <form method="post" action="{{ route('posts.destroy', ['post' => $post]) }}">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-primary">Delete</button>
                                 </form>
-                                <form method="get" action="{{ route('post.edit', ['id' => $post->id]) }}">
+                                <form method="get" action="{{ route('posts.edit', ['post' => $post]) }}">
                                     @csrf
                                     <button type="submit" class="btn btn-primary">Edit</button>
                                 </form>

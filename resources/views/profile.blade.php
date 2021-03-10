@@ -26,7 +26,7 @@
                     <ul class="list-group">
                         @foreach ($user->post as $post)
                             <li class="list-group-item">
-                                <a href="{{ route('post.show', ['id' => $post->id]) }}">{{ $post->title }}</a>
+                                <a href="{{ route('posts.show', ['post' => $post]) }}">{{ $post->title }}</a>
                             </li>
                         @endforeach
                     </ul>
