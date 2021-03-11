@@ -5,6 +5,11 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card mt-4 mb-4">
+                @if(session('success'))
+                    <div class="alert alert-success">
+                        {{ session('success') }}
+                    </div>
+                @endif
                 <div class="card-header">
                     <h1>{{ $post->title }}</h1>
                 </div>
@@ -17,7 +22,7 @@
                             <div class="nav-link" >
                                 Author:
                                 @if($post->user)
-                                    <a href="{{ route('user.show', ['id' => $post->user->id]) }}">{{ $post->user->name }}</a>
+                                    <a href="{{ route('user.show', ['user' => $post->user->id]) }}">{{ $post->user->name }}</a>
                                 @else
                                     Anonim
                                 @endif
@@ -40,8 +45,19 @@
                                 </form>
                             </div>
                         @endif
+                        <form method="post" action="{{ route('comments.store') }}">
+                            @csrf
+                            <div class="form-group">
+                                <textarea class="form-control" name="massage" required></textarea>
+                                <input type="hidden" name="post_id" value="{{ $post->id }}" />
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" value="Add Comment" />
+                            </div>
+                        </form>
                     </div>
                 </div>
+                    @include('showComments', ['comments' => $post->comments, 'post_id' => $post->id])
             </div>
         </div>
     </div>

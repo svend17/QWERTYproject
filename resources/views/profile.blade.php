@@ -9,7 +9,7 @@
                 @guest
                 @else
                     @if (Auth::user()->name == $user->name)
-                        <form action="{{route('user.image', ['id' => $user->id])}}" method="post" enctype="multipart/form-data">
+                        <form action="{{route('user.image', ['user' => $user->id])}}" method="post" enctype="multipart/form-data">
                             @csrf
                             <div class="form-group">
                                 <input type="file" name="img" class="form-control-file" accept="image/*">
@@ -24,7 +24,7 @@
                 </div>
                 <div class="row">
                     <ul class="list-group">
-                        @foreach ($user->post as $post)
+                        @foreach ($user->posts as $post)
                             <li class="list-group-item">
                                 <a href="{{ route('posts.show', ['post' => $post]) }}">{{ $post->title }}</a>
                             </li>

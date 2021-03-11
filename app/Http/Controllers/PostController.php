@@ -18,8 +18,8 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::select('posts.*')
-            ->orderBy('posts.created_at', 'desc')
+        $posts = Post::query()
+            ->orderBy('created_at', 'desc')
             ->paginate(15);
         return view('posts', ['posts' => $posts, 'tags' => Tag::all()]);
     }
@@ -31,11 +31,10 @@ class PostController extends Controller
      */
     public function mostViews()
     {
-        $posts = Post::select('posts.*')
+        $posts = Post::query()
             ->orderBy('views', 'desc')
             ->paginate(15);
-        return view('posts',
-            ['posts' => $posts, 'tags' => Tag::all()]
+        return view('posts', ['posts' => $posts, 'tags' => Tag::all()]
         );
     }
 
@@ -46,14 +45,19 @@ class PostController extends Controller
      */
     public function myPost()
     {
-        $posts = Post::select('posts.*')
+        $posts = Post::query()
             ->where('user_id', Auth::id())
-            ->orderBy('posts.created_at', 'desc')
+            ->orderBy('created_at', 'desc')
             ->paginate(15);
-        return view('posts',
-            ['posts' => $posts, 'tags' => Tag::all()]
-        );
+        return view('posts', ['posts' => $posts, 'tags' => Tag::all()]);
     }
+
+    public function withoutReply()
+    {
+        $posts = Post::doesntHave('comments')->paginate(15);
+        return view('posts', ['posts' => $posts, 'tags' => Tag::all()]);
+    }
+
     /**
      * Show the form for creating a new post.
      *
@@ -73,23 +77,24 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        $post = new Post;
-        $post->title = $request->title;
-        $post->excerpt = $request->excerpt;
-        $post->body = $request->body;
-        if (Auth::check()) {
-            $post->user_id = Auth::id();
-        }
-        $tags = explode(",", $request->tags);
+        $post = Post::create([
+            'title' => request('title'),
+            'excerpt' => request('excerpt'),
+            'body' => request('body'),
+            'user_id' => Auth::id() ?? null,
+            'category_id' => request('category')
+        ]);
+
+        $tags = explode(",", request('tags'));
         $tagModels = [];
+
         foreach ($tags as $tag)
         {
             $tagModels[] = Tag::firstOrCreate([
                 'name' => $tag
             ])->id;
         }
-        $post->category_id = $request->category;
-        $post->save();
+
         $post->tags()->attach($tagModels);
         return redirect()
             ->route('posts.index')
@@ -99,12 +104,11 @@ class PostController extends Controller
     /**
      * Display the post.
      *
-     * @param  int  $id
+     * @param  Post $post
      * @return \Illuminate\Contracts\View\View
      */
-    public function show(int $id)
+    public function show(Post $post)
     {
-        $post = Post::findOrFail($id);
         $post->views++;
         $post->save();
         return view('showPost',
@@ -118,9 +122,8 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Contracts\View\View
      */
-    public function edit(int $id)
+    public function edit(Post $post)
     {
-        $post = Post::findOrFail($id);
         $categories = Category::all();
         return view('edit', ['post'=>$post, 'categories' => $categories]);
     }
@@ -129,26 +132,29 @@ class PostController extends Controller
      * Update the post.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  Post  $post
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function update(Request $request, int $id)
+    public function update(Request $request, Post $post)
     {
-        $post = Post::findOrFail($id);
-        $post->title = $request->title;
-        $post->excerpt = $request->excerpt;
-        $post->body = $request->body;
-        $post->category_id = $request->category;
-        $post->created_at = date('Y-m-d H:i:s');
-        $post->save();
-        $tags = explode(",", $request->tags);
+        Post::update([
+            'title' => request('title'),
+            'excerpt' => request('excerpt'),
+            'body' => request('body'),
+            'user_id' => Auth::id() ?? null,
+            'category_id' => request('category')
+        ]);
+
+        $tags = explode(",", request('tags'));
         $tagModels = [];
+
         foreach ($tags as $tag)
         {
             $tagModels[] = Tag::firstOrCreate([
                 'name' => $tag
             ])->id;
         }
+
         $post->tags()->sync($tagModels);
         return redirect()
             ->route('posts.index')
@@ -158,13 +164,16 @@ class PostController extends Controller
     /**
      * Remove the post.
      *
-     * @param  int  $id
+     * @param Post $post
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function destroy(int $id)
+    public function destroy(Post $post)
     {
-        $post = Post::findOrFail($id);
-        $post->delete();
+        try {
+            $post->delete();
+        } catch (Exception $e) {
+            abort('404');
+        }
         return redirect()
             ->route('posts.index')
             ->with('success', 'Post deleted');
@@ -179,7 +188,7 @@ class PostController extends Controller
     public function search(Request $request)
     {
         $postsId = TagsPosts::select('post_id')->whereIn('tag_id', $request->tags)->distinct()->get();
-        $posts = Post::whereIn('id', $postsId)->get();
+        $posts = Post::whereIn('id', $postsId)->paginate(15);
         return view('posts', ['posts' => $posts, 'tags' => Tag::all()]);
     }
 }

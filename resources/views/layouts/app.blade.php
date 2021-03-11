@@ -58,7 +58,7 @@
                 @else
                     <ul class="nav">
                         <li class="nav-item">
-                            <a class="nav-link" href="{{route('user.show', ['id' => Auth::user()->id])}}">
+                            <a class="nav-link" href="{{route('user.show', ['user' => Auth::id()])}}">
                                 {{ Auth::user()->name }}
                             </a>
                         </li>

@@ -9,6 +9,8 @@ class Post extends Model
 {
     use HasFactory;
 
+    protected $guarded = [];
+
     /**
      * Relationship with Users
      *
@@ -42,5 +44,15 @@ class Post extends Model
             'post_id',
             'tag_id'
         );
+    }
+
+    /**
+     * Relationship with Comments
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function comments()
+    {
+        return $this->hasMany(Comment::class)->whereNull('parent_id');
     }
 }

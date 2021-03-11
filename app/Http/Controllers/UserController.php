@@ -4,18 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
     /**
      * Show profile of user
      *
-     * @param $id
+     * @param User $user
      * @return \Illuminate\Contracts\View\View
      */
-    public function show(int $id)
+    public function show(User $user)
     {
-        $user = User::find($id);
         return view('profile', ['user'=>$user]);
     }
 
@@ -23,13 +23,13 @@ class UserController extends Controller
      * Store image to project storage
      *
      * @param Request $request
+     * @param User $user
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function image(Request $request, int $id)
+    public function image(Request $request, User $user)
     {
         if ($request->File()) {
-            $user = User::find($id);
-            $user->img = $request->file('img')->storeAs($request->path(), $request->user()->id, 'public');
+            $user->img = $request->file('img')->storeAs($request->path(), Auth::id(), 'public');
             $user->save();
         }
         return back();

@@ -29,7 +29,7 @@
                     <a class="nav-link" href="{{ route('posts.mostViews') }}">Most Views</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link " href="#" >Without reply</a>
+                    <a class="nav-link " href="{{ route('posts.withoutReply') }}" >Without reply</a>
                 </li>
                     @if(session('success'))
                         <div class="alert alert-success">
@@ -45,7 +45,7 @@
                                     <div class="nav-link" >
                                         Author:
                                         @if($post->user)
-                                            <a href="{{ route('user.show', ['id' => $post->user->id]) }}">{{ $post->user->name }}</a>
+                                            <a href="{{ route('user.show', ['user' => $post->user->id]) }}">{{ $post->user->name }}</a>
                                         @else
                                             Anonim
                                         @endif
@@ -65,9 +65,8 @@
                         </div>
                     @endforeach
                 </div>
-        @if(isset($post) && $post instanceof \Illuminate\Pagination\LengthAwarePaginator )
-        {{ $posts->links() }}
-        @endif
+
+        {{ $posts->appends(request()->query())->links() }}
             </ul>
         </div>
     </div>
