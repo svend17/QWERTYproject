@@ -65,4 +65,9 @@ class PostRepository implements PostRepositoryInterface
             ->orderBy('created_at', 'desc')
             ->paginate(15);
     }
+
+    public function filter($postsID): LengthAwarePaginator
+    {
+        return $this->model->whereIn('id', $postsID)->paginate(15);
+    }
 }

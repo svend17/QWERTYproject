@@ -88,25 +88,10 @@ class PostController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $input = [
-            'title' => request('title'),
-            'excerpt' => request('excerpt'),
-            'body' => request('body'),
-            'user_id' => Auth::id() ?? null,
-            'category_id' => request('category')
-        ];
-
+        $input = $request->except('_token');
+        $input['user_id'] = Auth::id() ?? null;
         $post = $this->postRepository->save($input);
-        $tags = explode(",", request('tags'));
-        $tagModels = [];
-
-        foreach ($tags as $tag)
-        {
-            $tagModels[] = Tag::firstOrCreate([
-                'name' => $tag
-            ])->id;
-        }
-
+        $tagModels = $this->getTags(request('tags'));
         $post->tags()->attach($tagModels);
         return redirect()
             ->route('posts.index')
@@ -148,25 +133,10 @@ class PostController extends Controller
      */
     public function update(Request $request, Post $post): RedirectResponse
     {
-        $input = ([
-            'title' => request('title'),
-            'excerpt' => request('excerpt'),
-            'body' => request('body'),
-            'user_id' => Auth::id() ?? null,
-            'category_id' => request('category')
-        ]);
-
+        $input = $request->except('_token');
+        $input['user_id'] = Auth::id() ?? null;
         $this->postRepository->update($post->id, $input);
-        $tags = explode(",", request('tags'));
-        $tagModels = [];
-
-        foreach ($tags as $tag)
-        {
-            $tagModels[] = Tag::firstOrCreate([
-                'name' => $tag
-            ])->id;
-        }
-
+        $tagModels = $this->getTags(request('tags'));
         $post->tags()->sync($tagModels);
         return redirect()
             ->route('posts.index')
@@ -196,7 +166,20 @@ class PostController extends Controller
     public function filter(Request $request): View
     {
         $postsId = TagsPosts::select('post_id')->whereIn('tag_id', $request->tags)->distinct()->get();
-        $posts = Post::whereIn('id', $postsId)->paginate(15);
-        return view('posts', ['posts' => $posts, 'tags' => Tag::all()]);
+        return view('posts', ['posts' => $this->postRepository->filter($postsId), 'tags' => Tag::all()]);
+    }
+
+    public function getTags($tagsInput): array
+    {
+        $tags = explode(",", $tagsInput);
+
+        foreach ($tags as $tag)
+        {
+            $tagModels[] = Tag::firstOrCreate([
+                'name' => $tag
+            ])->id;
+        }
+
+        return $tagModels;
     }
 }

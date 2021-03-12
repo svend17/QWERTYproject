@@ -11,6 +11,7 @@ interface PostRepositoryInterface
     public function index();
     public function save(array $input);
     public function update(int $id, array $input);
+    public function filter($postsID);
     public function delete(int $id);
 
     public function getWithoutReplyPosts();
