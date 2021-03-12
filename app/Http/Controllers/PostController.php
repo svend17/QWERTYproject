@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
 use App\Models\Post;
-use App\Models\Tag;
-use App\Models\TagsPosts;
+use App\Repositories\Interfaces\CategoryRepositoryInterface;
 use App\Repositories\Interfaces\PostRepositoryInterface;
+use App\Repositories\Interfaces\TagRepositoryInterface;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,75 +13,101 @@ use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
+    private const MASSAGE_EDIT = 'Post Edit';
+    private const MASSAGE_DELETE = 'Post Delete';
+    private const MASSAGE_CREATE = 'Post Create';
+
+    /**
+     * @var PostRepositoryInterface
+     */
     private $postRepository;
 
     /**
-     * PostController constructor.
-     *
-     * @param PostRepositoryInterface $postRepository
+     * @var TagRepositoryInterface
      */
-    public function __construct(PostRepositoryInterface $postRepository)
-    {
+    private $tagRepository;
+
+    /**
+     * @var CategoryRepositoryInterface
+     */
+    private $categoryRepository;
+
+    /**
+     * PostController constructor.
+     * @param PostRepositoryInterface $postRepository
+     * @param TagRepositoryInterface $tagRepository
+     * @param CategoryRepositoryInterface $categoryRepository
+     */
+    public function __construct(
+        PostRepositoryInterface $postRepository,
+        TagRepositoryInterface $tagRepository,
+        CategoryRepositoryInterface $categoryRepository
+    ) {
         $this->postRepository = $postRepository;
+        $this->tagRepository = $tagRepository;
+        $this->categoryRepository = $categoryRepository;
     }
 
     /**
      * Display a listing of the post.
-     *
      * @return View
      */
     public function index(): View
     {
-        return view('posts', ['posts' => $this->postRepository->index(), 'tags' => Tag::all()]);
+        return view('posts', [
+            'posts' => $this->postRepository->index(),
+            'tags' => $this->tagRepository->getTags()
+        ]);
     }
 
     /**
      * Display most views posts
-     *
      * @return View
      */
     public function mostViews(): View
     {
         return view('posts', [
             'posts' => $this->postRepository->getMostViewPosts(),
-            'tags' => Tag::all()
+            'tags' => $this->tagRepository->getTags()
         ]);
     }
 
     /**
      * Display posts of the current user
-     *
      * @return View
      */
     public function myPost(): View
     {
         return view('posts', [
             'posts' => $this->postRepository->getUserPosts(),
-            'tags' => Tag::all()
+            'tags' => $this->tagRepository->getTags()
         ]);
     }
 
-    public function withoutReply()
+    /**
+     * @return View
+     */
+    public function withoutReply(): View
     {
         return view('posts', [
             'posts' => $this->postRepository->getWithoutReplyPosts(),
-            'tags' => Tag::all()
+            'tags' => $this->tagRepository->getTags()
         ]);
     }
 
     /**
      * Show the form for creating a new post.
-     *
      * @return View
      */
     public function create(): View
     {
-        return view('create', ['categories' => Category::all()]);
+        return view('create', [
+            'categories' => $this->categoryRepository->getCategories()
+        ]);
     }
 
     /**
      * Store a newly created post.
-     *
      * @param Request $request
      * @return RedirectResponse
      */
@@ -93,14 +118,14 @@ class PostController extends Controller
         $post = $this->postRepository->save($input);
         $tagModels = $this->getTags(request('tags'));
         $post->tags()->attach($tagModels);
+
         return redirect()
             ->route('posts.index')
-            ->with('success', 'Post added');
+            ->with('success', self::MASSAGE_CREATE);
     }
 
     /**
      * Display the post.
-     *
      * @param  Post $post
      * @return View
      */
@@ -108,6 +133,7 @@ class PostController extends Controller
     {
         $post->views++;
         $post->save();
+
         return view('showPost',
             ['post' => $post]
         );
@@ -115,69 +141,78 @@ class PostController extends Controller
 
     /**
      * Show the form for editing post.
-     *
      * @param  Post  $post
      * @return View
      */
     public function edit(Post $post): View
     {
-        return view('edit', ['post'=>$post, 'categories' => Category::all()]);
+        return view('edit', [
+            'post'=>$post,
+            'categories' => $this->categoryRepository->getCategories()
+        ]);
     }
 
     /**
      * Update the post.
-     *
      * @param Request $request
      * @param  Post  $post
      * @return RedirectResponse
      */
     public function update(Request $request, Post $post): RedirectResponse
     {
-        $input = $request->except('_token');
+        $input = $request->except('_token', 'tags');
         $input['user_id'] = Auth::id() ?? null;
         $this->postRepository->update($post->id, $input);
         $tagModels = $this->getTags(request('tags'));
         $post->tags()->sync($tagModels);
+
         return redirect()
             ->route('posts.index')
-            ->with('success', 'Post edited');
+            ->with('success', self::MASSAGE_EDIT);
     }
 
     /**
      * Remove the post.
-     *
      * @param Post $post
      * @return RedirectResponse
      */
     public function destroy(Post $post): RedirectResponse
     {
         $this->postRepository->delete($post->id);
+
         return redirect()
             ->route('posts.index')
-            ->with('success', 'Post deleted');
+            ->with('success', self::MASSAGE_DELETE);
     }
 
     /**
      * Post Filtration by tags
-     *
      * @param Request $request
      * @return View
      */
     public function filter(Request $request): View
     {
-        $postsId = TagsPosts::select('post_id')->whereIn('tag_id', $request->tags)->distinct()->get();
-        return view('posts', ['posts' => $this->postRepository->filter($postsId), 'tags' => Tag::all()]);
+        $postsId = $this->tagRepository->getPostIdByTags(request('tags'));
+
+        return view('posts', [
+            'posts' => $this->postRepository->filter($postsId),
+            'tags' => $this->tagRepository->getTags()
+        ]);
     }
 
-    public function getTags($tagsInput): array
+    /**
+     * Gets tag models from input string
+     * @param $tagsInput
+     * @return array
+     */
+    public function getTags(string $tagsInput): array
     {
         $tags = explode(",", $tagsInput);
+        $tagModels = [];
 
         foreach ($tags as $tag)
         {
-            $tagModels[] = Tag::firstOrCreate([
-                'name' => $tag
-            ])->id;
+            $tagModels[] = $this->tagRepository->firstOrCreate($tag);
         }
 
         return $tagModels;
