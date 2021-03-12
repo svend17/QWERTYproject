@@ -8,7 +8,7 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('posts/filter', 'PostController@search')->name('tags.search');
+Route::get('posts/filter', 'PostController@filter')->name('tags.filter');
 Route::get('posts/mostViews', 'PostController@mostViews')->name('posts.mostViews');
 Route::get('posts/myPost', 'PostController@myPost')->name('posts.myPost');
 Route::get('posts/withoutReply', 'PostController@withoutReply')->name('posts.withoutReply');

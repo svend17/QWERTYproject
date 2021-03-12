@@ -4,7 +4,7 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <form method="get" action="{{ route('tags.search', ['tags' => $tags]) }}">
+            <form method="get" action="{{ route('tags.filter', ['tags' => $tags]) }}">
                 <div class="row d-flex justify-content-center mt-100">
                     <div class="col-md-6">
                         <select id="choices-multiple-remove-button" placeholder="Select tags" multiple name="tags[]">
@@ -58,6 +58,8 @@
                                         @foreach($post->tags as $tag)
                                             {{ $tag->name }}
                                         @endforeach
+                                        <br>
+                                        Comments: {{ $post->comments->count() }}
                                     </div>
                                 </div>
                                 <a href="{{ route('posts.show', ['post' => $post->id]) }}" class="btn btn-dark float-right">Read...</a>

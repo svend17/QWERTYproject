@@ -6,85 +6,97 @@ use App\Models\Category;
 use App\Models\Post;
 use App\Models\Tag;
 use App\Models\TagsPosts;
+use App\Repositories\Interfaces\PostRepositoryInterface;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
+    private $postRepository;
+
+    /**
+     * PostController constructor.
+     *
+     * @param PostRepositoryInterface $postRepository
+     */
+    public function __construct(PostRepositoryInterface $postRepository)
+    {
+        $this->postRepository = $postRepository;
+    }
+
     /**
      * Display a listing of the post.
      *
-     * @return \Illuminate\Contracts\View\View
+     * @return View
      */
-    public function index()
+    public function index(): View
     {
-        $posts = Post::query()
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
-        return view('posts', ['posts' => $posts, 'tags' => Tag::all()]);
+        return view('posts', ['posts' => $this->postRepository->index(), 'tags' => Tag::all()]);
     }
 
     /**
      * Display most views posts
      *
-     * @return \Illuminate\Contracts\View\View
+     * @return View
      */
-    public function mostViews()
+    public function mostViews(): View
     {
-        $posts = Post::query()
-            ->orderBy('views', 'desc')
-            ->paginate(15);
-        return view('posts', ['posts' => $posts, 'tags' => Tag::all()]
-        );
+        return view('posts', [
+            'posts' => $this->postRepository->getMostViewPosts(),
+            'tags' => Tag::all()
+        ]);
     }
 
     /**
      * Display posts of the current user
      *
-     * @return \Illuminate\Contracts\View\View
+     * @return View
      */
-    public function myPost()
+    public function myPost(): View
     {
-        $posts = Post::query()
-            ->where('user_id', Auth::id())
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
-        return view('posts', ['posts' => $posts, 'tags' => Tag::all()]);
+        return view('posts', [
+            'posts' => $this->postRepository->getUserPosts(),
+            'tags' => Tag::all()
+        ]);
     }
 
     public function withoutReply()
     {
-        $posts = Post::doesntHave('comments')->paginate(15);
-        return view('posts', ['posts' => $posts, 'tags' => Tag::all()]);
+        return view('posts', [
+            'posts' => $this->postRepository->getWithoutReplyPosts(),
+            'tags' => Tag::all()
+        ]);
     }
 
     /**
      * Show the form for creating a new post.
      *
-     * @return \Illuminate\Contracts\View\View
+     * @return View
      */
-    public function create()
+    public function create(): View
     {
-        $categories = Category::all();
-        return view('create', ['categories' => $categories]);
+        return view('create', ['categories' => Category::all()]);
     }
 
     /**
      * Store a newly created post.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @param Request $request
+     * @return RedirectResponse
      */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        $post = Post::create([
+        $input = [
             'title' => request('title'),
             'excerpt' => request('excerpt'),
             'body' => request('body'),
             'user_id' => Auth::id() ?? null,
             'category_id' => request('category')
-        ]);
+        ];
 
+        $post = $this->postRepository->save($input);
         $tags = explode(",", request('tags'));
         $tagModels = [];
 
@@ -105,9 +117,9 @@ class PostController extends Controller
      * Display the post.
      *
      * @param  Post $post
-     * @return \Illuminate\Contracts\View\View
+     * @return View
      */
-    public function show(Post $post)
+    public function show(Post $post): View
     {
         $post->views++;
         $post->save();
@@ -119,25 +131,24 @@ class PostController extends Controller
     /**
      * Show the form for editing post.
      *
-     * @param  int  $id
-     * @return \Illuminate\Contracts\View\View
+     * @param  Post  $post
+     * @return View
      */
-    public function edit(Post $post)
+    public function edit(Post $post): View
     {
-        $categories = Category::all();
-        return view('edit', ['post'=>$post, 'categories' => $categories]);
+        return view('edit', ['post'=>$post, 'categories' => Category::all()]);
     }
 
     /**
      * Update the post.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param Request $request
      * @param  Post  $post
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
-    public function update(Request $request, Post $post)
+    public function update(Request $request, Post $post): RedirectResponse
     {
-        Post::update([
+        $input = ([
             'title' => request('title'),
             'excerpt' => request('excerpt'),
             'body' => request('body'),
@@ -145,6 +156,7 @@ class PostController extends Controller
             'category_id' => request('category')
         ]);
 
+        $this->postRepository->update($post->id, $input);
         $tags = explode(",", request('tags'));
         $tagModels = [];
 
@@ -165,27 +177,23 @@ class PostController extends Controller
      * Remove the post.
      *
      * @param Post $post
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
-    public function destroy(Post $post)
+    public function destroy(Post $post): RedirectResponse
     {
-        try {
-            $post->delete();
-        } catch (Exception $e) {
-            abort('404');
-        }
+        $this->postRepository->delete($post->id);
         return redirect()
             ->route('posts.index')
             ->with('success', 'Post deleted');
     }
 
     /**
-     * Post Filtration
+     * Post Filtration by tags
      *
      * @param Request $request
-     * @return \Illuminate\Contracts\View\View
+     * @return View
      */
-    public function search(Request $request)
+    public function filter(Request $request): View
     {
         $postsId = TagsPosts::select('post_id')->whereIn('tag_id', $request->tags)->distinct()->get();
         $posts = Post::whereIn('id', $postsId)->paginate(15);
