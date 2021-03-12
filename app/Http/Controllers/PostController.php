@@ -88,7 +88,7 @@ class PostController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $input = $request->except('_token');
+        $input = $request->except('_token', 'tags');
         $input['user_id'] = Auth::id() ?? null;
         $post = $this->postRepository->save($input);
         $tagModels = $this->getTags(request('tags'));

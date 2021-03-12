@@ -11,7 +11,7 @@
 <div class="form-group">
     <textarea class="form-control" name="tags" placeholder="Tags">@if(isset($post))@foreach($post->tags as $tag){{ $tag->name }},@endforeach @endif</textarea>
 </div>
-<select class="custom-select" name="category">
+<select class="custom-select" name="category_id">
         @foreach($categories as $category)
         @if(isset($post) && $category->id == $post->category->id)
             <option selected value="{{ $category->id }}">{{ $post->category->name }}</option>
